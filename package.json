@@ -1,0 +1,71 @@
+{
+  "name": "maxlabs-vscode",
+  "displayName": "MaxLabs",
+  "description": "OAuth-first MaxLabs coding agent for Visual Studio Code",
+  "version": "0.1.0",
+  "type": "module",
+  "publisher": "maxlabs",
+  "license": "MIT",
+  "engines": { "vscode": "^1.96.0", "node": ">=20.0.0" },
+  "categories": ["Machine Learning", "Other"],
+  "keywords": ["maxlabs", "ai", "coding-agent", "chat"],
+  "icon": "media/icon.png",
+  "main": "./dist/extension.js",
+  "activationEvents": ["onView:maxlabs.chat", "onWebviewPanel:maxlabs.chatTab"],
+  "contributes": {
+    "commands": [
+      { "command": "maxlabs.openChat", "title": "MaxLabs: Open Chat", "icon": "$(comment-discussion)" },
+      { "command": "maxlabs.newChat", "title": "MaxLabs: New Chat Tab", "icon": { "light": "media/icon.png", "dark": "media/icon.png" } },
+      { "command": "maxlabs.resetChat", "title": "MaxLabs: Clear Current Chat", "icon": "$(refresh)" },
+      { "command": "maxlabs.login", "title": "MaxLabs: Sign In with OAuth" },
+      { "command": "maxlabs.switchAccount", "title": "MaxLabs: Switch Personal or Work Account" },
+      { "command": "maxlabs.setApiKey", "title": "MaxLabs: Set API Key Fallback" },
+      { "command": "maxlabs.logout", "title": "MaxLabs: Sign Out" },
+      { "command": "maxlabs.selectModel", "title": "MaxLabs: Select Model" },
+      { "command": "maxlabs.selectThinking", "title": "MaxLabs: Select Thinking Level" },
+      { "command": "maxlabs.selectMode", "title": "MaxLabs: Select Agent Mode" },
+      { "command": "maxlabs.selectWebSearch", "title": "MaxLabs: Select Web Search Behavior" },
+      { "command": "maxlabs.stop", "title": "MaxLabs: Stop Current Turn" }
+    ],
+    "viewsContainers": {
+      "activitybar": [{ "id": "maxlabs", "title": "MaxLabs", "icon": "media/activity.svg" }]
+    },
+    "views": {
+      "maxlabs": [{ "type": "webview", "id": "maxlabs.chat", "name": "Chat", "icon": "media/activity.svg" }]
+    },
+    "menus": {
+      "view/title": [
+        { "command": "maxlabs.newChat", "when": "view == maxlabs.chat", "group": "navigation" },
+        { "command": "maxlabs.stop", "when": "view == maxlabs.chat && maxlabs.running", "group": "navigation" }
+      ],
+      "editor/title": [
+        { "command": "maxlabs.newChat", "group": "navigation@90" }
+      ]
+    },
+    "configuration": {
+      "title": "MaxLabs",
+      "properties": {
+        "maxlabs.gatewayUrl": { "type": "string", "default": "http://127.0.0.1:8000", "description": "Gateway origin used for OAuth and authenticated app requests." },
+        "maxlabs.apiBaseUrl": { "type": "string", "default": "http://127.0.0.1:8000/v1", "description": "OpenAI-compatible API URL used by the API-key fallback." },
+        "maxlabs.model": { "type": "string", "default": "worker", "description": "Preferred model. Falls back to the first enabled model." },
+        "maxlabs.thinking": { "type": "string", "enum": ["minimal", "low", "medium", "high", "default"], "default": "low" },
+        "maxlabs.mode": { "type": "string", "enum": ["act", "plan", "auto"], "default": "act", "description": "Plan blocks mutations; act asks; auto allows audited safe edits." },
+        "maxlabs.webSearch": { "type": "string", "enum": ["off", "auto", "always"], "default": "auto" },
+        "maxlabs.webSearchUses": { "type": "integer", "default": 3, "minimum": 0, "maximum": 20 },
+        "maxlabs.maxSteps": { "type": "integer", "default": 40, "minimum": 1, "maximum": 100 }
+      }
+    }
+  },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "watch": "node scripts/build.mjs --watch",
+    "test": "npm run build && node --check media/main.js && node --test test/*.test.js",
+    "package": "npm run build && npx @vscode/vsce package"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/vscode": "^1.96.0",
+    "@vscode/vsce": "^3.2.0",
+    "typescript": "^5.7.0"
+  }
+}
