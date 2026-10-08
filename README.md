@@ -13,7 +13,7 @@ Use **MaxLabs: Sign In with OAuth** from the Command Palette. An API key can be 
 
 The account picker in the composer and **MaxLabs: Switch Personal or Work Account** let you move between connected personal and company contexts. Each context keeps its own OAuth token in SecretStorage and therefore retains its own billing, subscription, quota, and usage boundary. Use **Add or reconnect account** to authorize another context in the browser. Account changes are blocked while an agent run is active.
 
-The default model is `worker`, the default thinking level is `medium`, and the default mode is `act`. Configure model, thinking, mode, web search, Gateway URLs, and step limits under Settings → MaxLabs.
+The default model is `worker`, the default thinking level is `medium`, and the default mode is `act`. OAuth connects to `https://console.maxlabs.cenmax.in`, and API requests use `https://api.maxlabs.cenmax.in/v1`. Configure model, thinking, mode, web search, URLs, and step limits under Settings → MaxLabs.
 
 ## Safety modes
 

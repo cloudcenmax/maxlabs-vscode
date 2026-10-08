@@ -116,7 +116,7 @@ class Runtime implements vscode.Disposable {
   root(): vscode.Uri | undefined { return vscode.workspace.workspaceFolders?.[0]?.uri; }
   transport(sessionId = `vscode-${crypto.randomUUID()}`): GatewayTransport {
     const value = config();
-    return new GatewayTransport(this.auth, () => value.get("gatewayUrl", "http://127.0.0.1:8000"), () => value.get("apiBaseUrl", "http://127.0.0.1:8000/v1"), sessionId);
+    return new GatewayTransport(this.auth, () => value.get("gatewayUrl", "https://console.maxlabs.cenmax.in"), () => value.get("apiBaseUrl", "https://api.maxlabs.cenmax.in/v1"), sessionId);
   }
 
   async login(requesting?: ChatSession): Promise<void> {
@@ -124,7 +124,7 @@ class Runtime implements vscode.Disposable {
     requesting?.view.status("Starting OAuth sign in…");
     const account = await vscode.window.withProgress({ location: vscode.ProgressLocation.Notification, title: "Choose a MaxLabs account in your browser…", cancellable: true }, async (_, token) => {
       const controller = new AbortController(); token.onCancellationRequested(() => controller.abort());
-      return this.auth.login(config().get("gatewayUrl", "http://127.0.0.1:8000"), controller.signal);
+      return this.auth.login(config().get("gatewayUrl", "https://console.maxlabs.cenmax.in"), controller.signal);
     });
     await this.afterAccountChange(`Using ${account.name}`);
     void vscode.window.showInformationMessage(`MaxLabs is now using ${account.name}.`);
@@ -146,7 +146,7 @@ class Runtime implements vscode.Disposable {
     if (!this.authenticated) { this.accounts = []; requesting?.view.accounts([]); return; }
     requesting?.view.accountLoading();
     try {
-      this.accounts = await this.auth.accounts(config().get("gatewayUrl", "http://127.0.0.1:8000"));
+      this.accounts = await this.auth.accounts(config().get("gatewayUrl", "https://console.maxlabs.cenmax.in"));
       for (const session of this.sessions) session.view.accounts(this.accounts);
     } catch (error) {
       requesting?.view.error(error instanceof Error ? error.message : String(error));

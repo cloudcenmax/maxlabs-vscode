@@ -9,6 +9,14 @@
   "engines": { "vscode": "^1.96.0", "node": ">=20.0.0" },
   "categories": ["Machine Learning", "Other"],
   "keywords": ["maxlabs", "ai", "coding-agent", "chat"],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cloudcenmax/maxlabs-vscode.git"
+  },
+  "homepage": "https://github.com/cloudcenmax/maxlabs-vscode#readme",
+  "bugs": {
+    "url": "https://github.com/cloudcenmax/maxlabs-vscode/issues"
+  },
   "icon": "media/icon.png",
   "main": "./dist/extension.js",
   "activationEvents": ["onView:maxlabs.chat", "onWebviewPanel:maxlabs.chatTab"],
@@ -45,8 +53,8 @@
     "configuration": {
       "title": "MaxLabs",
       "properties": {
-        "maxlabs.gatewayUrl": { "type": "string", "default": "http://127.0.0.1:8000", "description": "Gateway origin used for OAuth and authenticated app requests." },
-        "maxlabs.apiBaseUrl": { "type": "string", "default": "http://127.0.0.1:8000/v1", "description": "OpenAI-compatible API URL used by the API-key fallback." },
+        "maxlabs.gatewayUrl": { "type": "string", "default": "https://console.maxlabs.cenmax.in", "description": "MaxLabs Console URL used for OAuth and authenticated account requests." },
+        "maxlabs.apiBaseUrl": { "type": "string", "default": "https://api.maxlabs.cenmax.in/v1", "description": "MaxLabs API URL used by the API-key fallback." },
         "maxlabs.model": { "type": "string", "default": "worker", "description": "Preferred model. Falls back to the first enabled model." },
         "maxlabs.thinking": { "type": "string", "enum": ["minimal", "low", "medium", "high", "default"], "default": "low" },
         "maxlabs.mode": { "type": "string", "enum": ["act", "plan", "auto"], "default": "act", "description": "Plan blocks mutations; act asks; auto allows audited safe edits." },
