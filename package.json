@@ -1,8 +1,8 @@
 {
   "name": "maxlabs-vscode",
-  "displayName": "MaxLabs",
-  "description": "OAuth-first MaxLabs coding agent for Visual Studio Code",
-  "version": "0.1.0",
+  "displayName": "Cenmax AI",
+  "description": "OAuth-first Cenmax AI coding agent for Visual Studio Code",
+  "version": "0.1.1",
   "type": "module",
   "publisher": "maxlabs",
   "license": "MIT",
@@ -22,21 +22,21 @@
   "activationEvents": ["onView:maxlabs.chat", "onWebviewPanel:maxlabs.chatTab"],
   "contributes": {
     "commands": [
-      { "command": "maxlabs.openChat", "title": "MaxLabs: Open Chat", "icon": "$(comment-discussion)" },
-      { "command": "maxlabs.newChat", "title": "MaxLabs: New Chat Tab", "icon": { "light": "media/icon.png", "dark": "media/icon.png" } },
-      { "command": "maxlabs.resetChat", "title": "MaxLabs: Clear Current Chat", "icon": "$(refresh)" },
-      { "command": "maxlabs.login", "title": "MaxLabs: Sign In with OAuth" },
-      { "command": "maxlabs.switchAccount", "title": "MaxLabs: Switch Personal or Work Account" },
-      { "command": "maxlabs.setApiKey", "title": "MaxLabs: Set API Key Fallback" },
-      { "command": "maxlabs.logout", "title": "MaxLabs: Sign Out" },
-      { "command": "maxlabs.selectModel", "title": "MaxLabs: Select Model" },
-      { "command": "maxlabs.selectThinking", "title": "MaxLabs: Select Thinking Level" },
-      { "command": "maxlabs.selectMode", "title": "MaxLabs: Select Agent Mode" },
-      { "command": "maxlabs.selectWebSearch", "title": "MaxLabs: Select Web Search Behavior" },
-      { "command": "maxlabs.stop", "title": "MaxLabs: Stop Current Turn" }
+      { "command": "maxlabs.openChat", "title": "Cenmax AI: Open Chat", "icon": "$(comment-discussion)" },
+      { "command": "maxlabs.newChat", "title": "Cenmax AI: New Chat Tab", "icon": { "light": "media/icon.png", "dark": "media/icon.png" } },
+      { "command": "maxlabs.resetChat", "title": "Cenmax AI: Clear Current Chat", "icon": "$(refresh)" },
+      { "command": "maxlabs.login", "title": "Cenmax AI: Sign In with OAuth" },
+      { "command": "maxlabs.switchAccount", "title": "Cenmax AI: Switch Personal or Work Account" },
+      { "command": "maxlabs.setApiKey", "title": "Cenmax AI: Set API Key Fallback" },
+      { "command": "maxlabs.logout", "title": "Cenmax AI: Sign Out" },
+      { "command": "maxlabs.selectModel", "title": "Cenmax AI: Select Model" },
+      { "command": "maxlabs.selectThinking", "title": "Cenmax AI: Select Thinking Level" },
+      { "command": "maxlabs.selectMode", "title": "Cenmax AI: Select Agent Mode" },
+      { "command": "maxlabs.selectWebSearch", "title": "Cenmax AI: Select Web Search Behavior" },
+      { "command": "maxlabs.stop", "title": "Cenmax AI: Stop Current Turn" }
     ],
     "viewsContainers": {
-      "activitybar": [{ "id": "maxlabs", "title": "MaxLabs", "icon": "media/activity.svg" }]
+      "activitybar": [{ "id": "maxlabs", "title": "Cenmax AI", "icon": "media/activity.svg" }]
     },
     "views": {
       "maxlabs": [{ "type": "webview", "id": "maxlabs.chat", "name": "Chat", "icon": "media/activity.svg" }]
@@ -51,10 +51,10 @@
       ]
     },
     "configuration": {
-      "title": "MaxLabs",
+      "title": "Cenmax AI",
       "properties": {
-        "maxlabs.gatewayUrl": { "type": "string", "default": "https://console.maxlabs.cenmax.in", "description": "MaxLabs Console URL used for OAuth and authenticated account requests." },
-        "maxlabs.apiBaseUrl": { "type": "string", "default": "https://api.maxlabs.cenmax.in/v1", "description": "MaxLabs API URL used by the API-key fallback." },
+        "maxlabs.gatewayUrl": { "type": "string", "default": "https://console.ai.cenmax.in", "description": "Cenmax AI Console URL used for OAuth and authenticated account requests." },
+        "maxlabs.apiBaseUrl": { "type": "string", "default": "https://api.ai.cenmax.in/v1", "description": "Cenmax AI API URL used by the API-key fallback." },
         "maxlabs.model": { "type": "string", "default": "worker", "description": "Preferred model. Falls back to the first enabled model." },
         "maxlabs.thinking": { "type": "string", "enum": ["minimal", "low", "medium", "high", "default"], "default": "low" },
         "maxlabs.mode": { "type": "string", "enum": ["act", "plan", "auto"], "default": "act", "description": "Plan blocks mutations; act asks; auto allows audited safe edits." },

@@ -22,11 +22,11 @@ export function accountListRejectsCredential(status        )          { return s
 
 export function accountFromProfile(payload                         )                  {
   const raw = payload.account;
-  if (!raw || typeof raw !== "object") throw new Error("MaxLabs profile did not identify the billing account");
+  if (!raw || typeof raw !== "object") throw new Error("Cenmax AI profile did not identify the billing account");
   const account = raw                           ;
   const id = String(account.id || "").trim();
   const type = account.type === "personal" ? "personal" : account.type === "organization" ? "organization" : undefined;
-  if (!id || !type) throw new Error("MaxLabs profile returned an invalid billing account");
+  if (!id || !type) throw new Error("Cenmax AI profile returned an invalid billing account");
   return {
     id,
     type,

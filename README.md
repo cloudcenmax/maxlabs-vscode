@@ -1,19 +1,19 @@
-# MaxLabs for Visual Studio Code
+# Cenmax AI for Visual Studio Code
 
-MaxLabs brings the OAuth-first MaxLabs coding agent into a workspace-scoped VS Code chat view. It streams answers, can inspect and edit workspace files, runs bounded shell commands, fetches public references, and supports safe mid-run steering.
+Cenmax AI brings the OAuth-first Cenmax AI coding agent into a workspace-scoped VS Code chat view. It streams answers, can inspect and edit workspace files, runs bounded shell commands, fetches public references, and supports safe mid-run steering.
 
 ## Run locally
 
 1. Run `npm run build` in this directory.
 2. Open this directory in VS Code.
 3. Press `F5` and choose **Extension Development Host**.
-4. Open a folder in the development host, then select the MaxLabs activity-bar icon.
+4. Open a folder in the development host, then select the Cenmax AI activity-bar icon.
 
-Use **MaxLabs: Sign In with OAuth** from the Command Palette. An API key can be stored as a fallback with **MaxLabs: Set API Key Fallback**. Both token types are kept in VS Code SecretStorage.
+Use **Cenmax AI: Sign In with OAuth** from the Command Palette. An API key can be stored as a fallback with **Cenmax AI: Set API Key Fallback**. Both token types are kept in VS Code SecretStorage.
 
-The account picker in the composer and **MaxLabs: Switch Personal or Work Account** let you move between connected personal and company contexts. Each context keeps its own OAuth token in SecretStorage and therefore retains its own billing, subscription, quota, and usage boundary. Use **Add or reconnect account** to authorize another context in the browser. Account changes are blocked while an agent run is active.
+The account picker in the composer and **Cenmax AI: Switch Personal or Work Account** let you move between connected personal and company contexts. Each context keeps its own OAuth token in SecretStorage and therefore retains its own billing, subscription, quota, and usage boundary. Use **Add or reconnect account** to authorize another context in the browser. Account changes are blocked while an agent run is active.
 
-The default model is `worker`, the default thinking level is `medium`, and the default mode is `act`. OAuth connects to `https://console.maxlabs.cenmax.in`, and API requests use `https://api.maxlabs.cenmax.in/v1`. Configure model, thinking, mode, web search, URLs, and step limits under Settings → MaxLabs.
+The default model is `worker`, the default thinking level is `medium`, and the default mode is `act`. OAuth connects to `https://console.ai.cenmax.in`, and API requests use `https://api.ai.cenmax.in/v1`. Configure model, thinking, mode, web search, URLs, and step limits under Settings → Cenmax AI.
 
 ## Safety modes
 

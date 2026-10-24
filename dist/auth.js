@@ -69,9 +69,9 @@ export class AuthStore {
       const reason = String(payload.error || response.status);
       if (payload.error === "invalid_grant" || payload.error === "invalid_client" || response.status === 401) {
         await this.removeAccount(accountId);
-        throw new Error(`This MaxLabs account is no longer authorized (${reason}). Switch accounts or reconnect it.`);
+        throw new Error(`This Cenmax AI account is no longer authorized (${reason}). Switch accounts or reconnect it.`);
       }
-      throw new Error(`MaxLabs could not refresh this account (${reason}). Its saved sign-in was preserved; try again.`);
+      throw new Error(`Cenmax AI could not refresh this account (${reason}). Its saved sign-in was preserved; try again.`);
     }
     const refreshed = normalize(payload);
     const latest = parseStoredState(await this.secrets.get(oauthKey));
@@ -90,7 +90,7 @@ export class AuthStore {
     const grant = await response.json()         ;
     const target = grant.verification_uri_complete || grant.verification_uri;
     await vscode.env.openExternal(vscode.Uri.parse(target));
-    void vscode.window.showInformationMessage(`Approve MaxLabs in your browser. Code: ${grant.user_code}`);
+    void vscode.window.showInformationMessage(`Approve Cenmax AI in your browser. Code: ${grant.user_code}`);
     let interval = Math.max(grant.interval || 1, 1) * 1_000;
     const deadline = Date.now() + grant.expires_in * 1_000;
     while (Date.now() < deadline) {
@@ -180,7 +180,7 @@ function normalize(payload                         )              {
 async function authorizedJson(url        , token        , signal              )                                   {
   const response = await fetch(url, { headers: { accept: "application/json", authorization: `Bearer ${token}` }, signal });
   const payload = await responseJson(response);
-  if (!response.ok) throw new Error(`MaxLabs account lookup returned ${response.status}`);
+  if (!response.ok) throw new Error(`Cenmax AI account lookup returned ${response.status}`);
   return payload;
 }
 async function responseJson(response          )                                   {

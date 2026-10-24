@@ -62,7 +62,7 @@ class Runtime                              {
     this.sessions.add(sidebarSession);
     this.lastActive = sidebarSession;
     this.statusItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
-    this.statusItem.name = "MaxLabs"; this.statusItem.text = "$(comment-discussion) MaxLabs"; this.statusItem.tooltip = "Open a new MaxLabs chat tab"; this.statusItem.command = "maxlabs.newChat"; this.statusItem.show();
+    this.statusItem.name = "Cenmax AI"; this.statusItem.text = "$(comment-discussion) Cenmax AI"; this.statusItem.tooltip = "Open a new Cenmax AI chat tab"; this.statusItem.command = "maxlabs.newChat"; this.statusItem.show();
     context.subscriptions.push(this.statusItem);
     context.subscriptions.push(this.auth.onDidChange(() => { void this.refreshAuthState(); }));
     context.subscriptions.push(vscode.workspace.onDidChangeConfiguration((event) => {
@@ -116,18 +116,18 @@ class Runtime                              {
   root()                         { return vscode.workspace.workspaceFolders?.[0]?.uri; }
   transport(sessionId = `vscode-${crypto.randomUUID()}`)                   {
     const value = config();
-    return new GatewayTransport(this.auth, () => value.get("gatewayUrl", "https://console.maxlabs.cenmax.in"), () => value.get("apiBaseUrl", "https://api.maxlabs.cenmax.in/v1"), sessionId);
+    return new GatewayTransport(this.auth, () => value.get("gatewayUrl", "https://console.ai.cenmax.in"), () => value.get("apiBaseUrl", "https://api.ai.cenmax.in/v1"), sessionId);
   }
 
   async login(requesting              )                {
     this.assertIdleForAccountChange();
     requesting?.view.status("Starting OAuth sign in…");
-    const account = await vscode.window.withProgress({ location: vscode.ProgressLocation.Notification, title: "Choose a MaxLabs account in your browser…", cancellable: true }, async (_, token) => {
+    const account = await vscode.window.withProgress({ location: vscode.ProgressLocation.Notification, title: "Choose a Cenmax AI account in your browser…", cancellable: true }, async (_, token) => {
       const controller = new AbortController(); token.onCancellationRequested(() => controller.abort());
-      return this.auth.login(config().get("gatewayUrl", "https://console.maxlabs.cenmax.in"), controller.signal);
+      return this.auth.login(config().get("gatewayUrl", "https://console.ai.cenmax.in"), controller.signal);
     });
     await this.afterAccountChange(`Using ${account.name}`);
-    void vscode.window.showInformationMessage(`MaxLabs is now using ${account.name}.`);
+    void vscode.window.showInformationMessage(`Cenmax AI is now using ${account.name}.`);
   }
 
   async logout()                {
@@ -135,18 +135,18 @@ class Runtime                              {
     const previous = this.activeAccount?.name || "this account";
     await this.auth.logout();
     await this.afterAccountChange(`Disconnected ${previous}`);
-    void vscode.window.showInformationMessage(`Disconnected ${previous} from MaxLabs.`);
+    void vscode.window.showInformationMessage(`Disconnected ${previous} from Cenmax AI.`);
   }
 
   async logoutAll()                {
-    this.assertIdleForAccountChange(); await this.auth.logoutAll(); await this.afterAccountChange("Signed out of every MaxLabs account");
+    this.assertIdleForAccountChange(); await this.auth.logoutAll(); await this.afterAccountChange("Signed out of every Cenmax AI account");
   }
 
   async loadAccounts(requesting              )                {
     if (!this.authenticated) { this.accounts = []; requesting?.view.accounts([]); return; }
     requesting?.view.accountLoading();
     try {
-      this.accounts = await this.auth.accounts(config().get("gatewayUrl", "https://console.maxlabs.cenmax.in"));
+      this.accounts = await this.auth.accounts(config().get("gatewayUrl", "https://console.ai.cenmax.in"));
       for (const session of this.sessions) session.view.accounts(this.accounts);
     } catch (error) {
       requesting?.view.error(error instanceof Error ? error.message : String(error));
@@ -163,7 +163,7 @@ class Runtime                              {
       account,
     }));
     choices.push({ label: "$(add) Add or reconnect an account", description: "Choose Personal or Work in your browser", account: undefined                             });
-    const selected = await vscode.window.showQuickPick(choices, { title: "Switch MaxLabs account", placeHolder: this.activeAccount?.name });
+    const selected = await vscode.window.showQuickPick(choices, { title: "Switch Cenmax AI account", placeHolder: this.activeAccount?.name });
     if (!selected || selected.account?.active) return;
     if (!selected.account || !selected.account.connected) return this.login(requesting);
     await this.switchAccount(selected.account.id, requesting);
@@ -189,11 +189,11 @@ class Runtime                              {
   }
 
           assertIdleForAccountChange()       {
-    if ([...this.sessions].some((session) => session.running)) throw new Error("Stop the active MaxLabs run before changing accounts. This keeps one run on one billing account.");
+    if ([...this.sessions].some((session) => session.running)) throw new Error("Stop the active Cenmax AI run before changing accounts. This keeps one run on one billing account.");
   }
 
   async setApiKey(requesting              )                {
-    const value = await vscode.window.showInputBox({ title: "MaxLabs API key fallback", prompt: "Stored securely by VS Code and used only when OAuth is unavailable.", password: true, ignoreFocusOut: true });
+    const value = await vscode.window.showInputBox({ title: "Cenmax AI API key fallback", prompt: "Stored securely by VS Code and used only when OAuth is unavailable.", password: true, ignoreFocusOut: true });
     if (value === undefined) return;
     await this.auth.setApiKey(value.trim() || undefined);
     this.apiKeyConfigured = Boolean(value.trim()); this.credentialsReady = true;
@@ -257,7 +257,7 @@ class ChatSession                              {
   invalidateAgent()       { this.agent = undefined; }
   ensureAgent()        {
     if (this.agent) return this.agent;
-    const root = this.runtime.root(); if (!root) throw new Error("Open a folder or workspace before using MaxLabs");
+    const root = this.runtime.root(); if (!root) throw new Error("Open a folder or workspace before using Cenmax AI");
     this.agent = new Agent(this.runtime.transport(this.affinityId()), createTools(root), () => this.settings(), {
       delta: (text) => this.view.delta(text), status: (text) => this.view.status(text),
       reasoning: (text) => this.view.tokenProgress(text.length),
@@ -296,7 +296,7 @@ class ChatSession                              {
   newChat()       { this.stop(); this.agent?.reset(); this.history.splice(0); this.meter.reset(); this.chatId = crypto.randomUUID(); this.billingAccountId = this.runtime.activeAccount?.id; this.agent = undefined; this.persist(); this.view.reset(); this.view.status("New conversation ready"); this.view.sync(); }
   async selectModel()                {
     this.runtime.markActive(this);
-    const models = await vscode.window.withProgress({ location: vscode.ProgressLocation.Window, title: "Loading MaxLabs models…" }, () => this.runtime.transport().models());
+    const models = await vscode.window.withProgress({ location: vscode.ProgressLocation.Window, title: "Loading Cenmax AI models…" }, () => this.runtime.transport().models());
     const selected = await vscode.window.showQuickPick(models.map((model) => ({ label: model.id, description: model.description })), { title: "Select model for this chat", placeHolder: this.selectedModel });
     if (!selected) return; this.selectedModel = selected.label; this.invalidateAgent(); this.persist(); this.view.sync();
   }

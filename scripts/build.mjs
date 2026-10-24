@@ -22,6 +22,6 @@ async function build() {
 
 await build();
 if (process.argv.includes("--watch")) {
-  console.log("Watching MaxLabs extension sources…");
+  console.log("Watching Cenmax AI extension sources…");
   for await (const _event of watch(source)) await build();
 }
