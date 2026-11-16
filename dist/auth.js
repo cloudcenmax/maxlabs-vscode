@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
 import { accountFromProfile, accountListRejectsCredential, mergeAccountOptions, parseStoredState,                                                                                   } from "./accounts.js";
+import { isSafeVerificationUrl } from "./endpoints.js";
 
                                                                                                                                                               
 
@@ -84,11 +85,12 @@ export class AuthStore {
   async login(origin        , signal              )                           {
     const response = await fetch(`${trim(origin)}/oauth/device/code`, {
       method: "POST", headers: { "content-type": "application/x-www-form-urlencoded", accept: "application/json" },
-      body: new URLSearchParams({ client_id: "cli", scope: "profile usage:read chat" }), signal,
+      body: new URLSearchParams({ client_id: "cli", scope: "profile usage:read chat workspace:read mcp:execute" }), signal,
     });
     if (!response.ok) throw new Error(`OAuth device authorization returned ${response.status}`);
     const grant = await response.json()         ;
     const target = grant.verification_uri_complete || grant.verification_uri;
+    if (!target || !isSafeVerificationUrl(target, origin)) throw new Error("Cenmax AI returned an unsafe sign-in link. Check the configured Cenmax AI URL and try again.");
     await vscode.env.openExternal(vscode.Uri.parse(target));
     void vscode.window.showInformationMessage(`Approve Cenmax AI in your browser. Code: ${grant.user_code}`);
     let interval = Math.max(grant.interval || 1, 1) * 1_000;

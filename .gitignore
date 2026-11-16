@@ -7,3 +7,7 @@ coverage/
 *.log
 *.vsix
 
+
+# Browser automation artifacts: page snapshots, screenshots and session state.
+.cenmax/
+.playwright-cli/

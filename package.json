@@ -2,13 +2,24 @@
   "name": "maxlabs-vscode",
   "displayName": "Cenmax AI",
   "description": "OAuth-first Cenmax AI coding agent for Visual Studio Code",
-  "version": "0.1.1",
+  "version": "0.1.5",
   "type": "module",
   "publisher": "maxlabs",
   "license": "MIT",
-  "engines": { "vscode": "^1.96.0", "node": ">=20.0.0" },
-  "categories": ["Machine Learning", "Other"],
-  "keywords": ["maxlabs", "ai", "coding-agent", "chat"],
+  "engines": {
+    "vscode": "^1.96.0",
+    "node": ">=20.0.0"
+  },
+  "categories": [
+    "Machine Learning",
+    "Other"
+  ],
+  "keywords": [
+    "maxlabs",
+    "ai",
+    "coding-agent",
+    "chat"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/cloudcenmax/maxlabs-vscode.git"
@@ -19,48 +30,173 @@
   },
   "icon": "media/icon.png",
   "main": "./dist/extension.js",
-  "activationEvents": ["onView:maxlabs.chat", "onWebviewPanel:maxlabs.chatTab"],
+  "activationEvents": [
+    "onView:maxlabs.chat",
+    "onWebviewPanel:maxlabs.chatTab"
+  ],
   "contributes": {
     "commands": [
-      { "command": "maxlabs.openChat", "title": "Cenmax AI: Open Chat", "icon": "$(comment-discussion)" },
-      { "command": "maxlabs.newChat", "title": "Cenmax AI: New Chat Tab", "icon": { "light": "media/icon.png", "dark": "media/icon.png" } },
-      { "command": "maxlabs.resetChat", "title": "Cenmax AI: Clear Current Chat", "icon": "$(refresh)" },
-      { "command": "maxlabs.login", "title": "Cenmax AI: Sign In with OAuth" },
-      { "command": "maxlabs.switchAccount", "title": "Cenmax AI: Switch Personal or Work Account" },
-      { "command": "maxlabs.setApiKey", "title": "Cenmax AI: Set API Key Fallback" },
-      { "command": "maxlabs.logout", "title": "Cenmax AI: Sign Out" },
-      { "command": "maxlabs.selectModel", "title": "Cenmax AI: Select Model" },
-      { "command": "maxlabs.selectThinking", "title": "Cenmax AI: Select Thinking Level" },
-      { "command": "maxlabs.selectMode", "title": "Cenmax AI: Select Agent Mode" },
-      { "command": "maxlabs.selectWebSearch", "title": "Cenmax AI: Select Web Search Behavior" },
-      { "command": "maxlabs.stop", "title": "Cenmax AI: Stop Current Turn" }
+      {
+        "command": "maxlabs.openChat",
+        "title": "Cenmax AI: Open Chat",
+        "icon": "$(comment-discussion)"
+      },
+      {
+        "command": "maxlabs.newChat",
+        "title": "Cenmax AI: New Chat Tab",
+        "icon": {
+          "light": "media/icon.png",
+          "dark": "media/icon.png"
+        }
+      },
+      {
+        "command": "maxlabs.resetChat",
+        "title": "Cenmax AI: Clear Current Chat",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "maxlabs.login",
+        "title": "Cenmax AI: Sign In with OAuth"
+      },
+      {
+        "command": "maxlabs.switchAccount",
+        "title": "Cenmax AI: Switch Personal or Work Account"
+      },
+      {
+        "command": "maxlabs.setApiKey",
+        "title": "Cenmax AI: Set API Key Fallback"
+      },
+      {
+        "command": "maxlabs.logout",
+        "title": "Cenmax AI: Sign Out"
+      },
+      {
+        "command": "maxlabs.selectModel",
+        "title": "Cenmax AI: Select Model"
+      },
+      {
+        "command": "maxlabs.selectThinking",
+        "title": "Cenmax AI: Select Thinking Level"
+      },
+      {
+        "command": "maxlabs.selectMode",
+        "title": "Cenmax AI: Select Agent Mode"
+      },
+      {
+        "command": "maxlabs.selectWebSearch",
+        "title": "Cenmax AI: Select Web Search Behavior"
+      },
+      {
+        "command": "maxlabs.stop",
+        "title": "Cenmax AI: Stop Current Turn"
+      },
+      {
+        "command": "maxlabs.stopTerminals",
+        "title": "Cenmax AI: Stop Background Terminals"
+      }
     ],
     "viewsContainers": {
-      "activitybar": [{ "id": "maxlabs", "title": "Cenmax AI", "icon": "media/activity.svg" }]
+      "activitybar": [
+        {
+          "id": "maxlabs",
+          "title": "Cenmax AI",
+          "icon": "media/activity.svg"
+        }
+      ]
     },
     "views": {
-      "maxlabs": [{ "type": "webview", "id": "maxlabs.chat", "name": "Chat", "icon": "media/activity.svg" }]
+      "maxlabs": [
+        {
+          "type": "webview",
+          "id": "maxlabs.chat",
+          "name": "Chat",
+          "icon": "media/activity.svg"
+        }
+      ]
     },
     "menus": {
       "view/title": [
-        { "command": "maxlabs.newChat", "when": "view == maxlabs.chat", "group": "navigation" },
-        { "command": "maxlabs.stop", "when": "view == maxlabs.chat && maxlabs.running", "group": "navigation" }
+        {
+          "command": "maxlabs.newChat",
+          "when": "view == maxlabs.chat",
+          "group": "navigation"
+        },
+        {
+          "command": "maxlabs.stop",
+          "when": "view == maxlabs.chat && maxlabs.running",
+          "group": "navigation"
+        }
       ],
       "editor/title": [
-        { "command": "maxlabs.newChat", "group": "navigation@90" }
+        {
+          "command": "maxlabs.newChat",
+          "group": "navigation@90"
+        }
       ]
     },
     "configuration": {
       "title": "Cenmax AI",
       "properties": {
-        "maxlabs.gatewayUrl": { "type": "string", "default": "https://console.ai.cenmax.in", "description": "Cenmax AI Console URL used for OAuth and authenticated account requests." },
-        "maxlabs.apiBaseUrl": { "type": "string", "default": "https://api.ai.cenmax.in/v1", "description": "Cenmax AI API URL used by the API-key fallback." },
-        "maxlabs.model": { "type": "string", "default": "worker", "description": "Preferred model. Falls back to the first enabled model." },
-        "maxlabs.thinking": { "type": "string", "enum": ["minimal", "low", "medium", "high", "default"], "default": "low" },
-        "maxlabs.mode": { "type": "string", "enum": ["act", "plan", "auto"], "default": "act", "description": "Plan blocks mutations; act asks; auto allows audited safe edits." },
-        "maxlabs.webSearch": { "type": "string", "enum": ["off", "auto", "always"], "default": "auto" },
-        "maxlabs.webSearchUses": { "type": "integer", "default": 3, "minimum": 0, "maximum": 20 },
-        "maxlabs.maxSteps": { "type": "integer", "default": 40, "minimum": 1, "maximum": 100 }
+        "maxlabs.gatewayUrl": {
+          "type": "string",
+          "default": "https://console.ai.cenmax.in",
+          "description": "Cenmax AI Console URL used for OAuth and authenticated account requests.",
+          "scope": "application"
+        },
+        "maxlabs.apiBaseUrl": {
+          "type": "string",
+          "default": "https://api.ai.cenmax.in/v1",
+          "description": "Cenmax AI API URL used by the API-key fallback.",
+          "scope": "application"
+        },
+        "maxlabs.model": {
+          "type": "string",
+          "default": "worker",
+          "description": "Preferred model. Falls back to the first enabled model."
+        },
+        "maxlabs.thinking": {
+          "type": "string",
+          "enum": [
+            "minimal",
+            "low",
+            "medium",
+            "high",
+            "default"
+          ],
+          "default": "low"
+        },
+        "maxlabs.mode": {
+          "type": "string",
+          "enum": [
+            "act",
+            "plan",
+            "auto"
+          ],
+          "default": "act",
+          "description": "Plan blocks mutations; act asks; auto allows audited safe edits.",
+          "scope": "application"
+        },
+        "maxlabs.webSearch": {
+          "type": "string",
+          "enum": [
+            "off",
+            "auto",
+            "always"
+          ],
+          "default": "auto"
+        },
+        "maxlabs.webSearchUses": {
+          "type": "integer",
+          "default": 3,
+          "minimum": 0,
+          "maximum": 20
+        },
+        "maxlabs.maxSteps": {
+          "type": "integer",
+          "default": 40,
+          "minimum": 1,
+          "maximum": 100
+        }
       }
     }
   },
@@ -75,5 +211,13 @@
     "@types/vscode": "^1.96.0",
     "@vscode/vsce": "^3.2.0",
     "typescript": "^5.7.0"
+  },
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": false
+    },
+    "virtualWorkspaces": {
+      "supported": true
+    }
   }
 }

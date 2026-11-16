@@ -1,22 +1,32 @@
                                            
-                                                                                  
+                                                                                              
 import { emptyUsage } from "./protocol.js";
+import { redactSecrets,                    } from "./security.js";
 
                                                                                                                                                        
                                                               
+                                                                                                         
+                                                                                                                                                        
+                                                                                                                                        
+export class TransportError extends Error {
+           status        ;
+           requestId         ;
+  constructor(message        , status        , requestId         ) { super(message); this.name = "TransportError"; this.status = status; this.requestId = requestId; }
+}
 
 export class GatewayTransport {
            auth           ;
            origin              ;
            apiBase              ;
            sessionId        ;
-  constructor(auth           , origin              , apiBase              , sessionId        ) { this.auth = auth; this.origin = origin; this.apiBase = apiBase; this.sessionId = sessionId; }
+           diagnostic                                      ;
+  constructor(auth           , origin              , apiBase              , sessionId        , diagnostic                                       = defaultDiagnostic) { this.auth = auth; this.origin = origin; this.apiBase = apiBase; this.sessionId = sessionId; this.diagnostic = diagnostic; }
 
   async models(signal              )                       {
     const response = await this.request("/models", { method: "GET", signal });
-    const payload = await response.json()                          ;
+    const payload = await jsonPayload(response)                          ;
     const models = (payload.data || []).filter((model) => model.id?.trim());
-    if (!models.length) throw new Error("Gateway returned no enabled models");
+    if (!models.length) throw new Error("Cenmax AI returned no enabled models.");
     return models;
   }
 
@@ -32,8 +42,62 @@ export class GatewayTransport {
       }),
     });
     const contentType = response.headers.get("content-type") || "";
-    if (!contentType.toLowerCase().includes("text/event-stream")) return buffered(await response.json()                           , onDelta, onReasoning);
+    if (!contentType.toLowerCase().includes("text/event-stream")) return buffered(await jsonPayload(response), onDelta, onReasoning);
     return parseEventStream(response, onDelta, onReasoning);
+  }
+
+  /** Account-scoped cloud workspace endpoints: connected MCP tools and skills. OAuth only. */
+  async workspace   (path        , options                          = {})             {
+    const token = await this.auth.accessToken(this.origin(), options.signal);
+    if (!token) throw new Error("Sign in with OAuth to use your connected tools and skills.");
+    const headers                         = { accept: "application/json", authorization: `Bearer ${token}` };
+    if (options.body !== undefined) headers["content-type"] = "application/json";
+    if (options.idempotencyKey) headers["Idempotency-Key"] = options.idempotencyKey;
+    const target = `/app/v1/workspace${path}`;
+    const response = await fetch(`${this.origin().replace(/\/$/, "")}${target}`, {
+      method: options.method || "GET", headers, signal: options.signal,
+      body: options.body === undefined ? undefined : JSON.stringify(options.body),
+    });
+    if (!response.ok) {
+      const requestId = publicRequestId(response.headers);
+      this.diagnostic({ path: target, status: response.status, requestId, detail: (await response.text()).slice(0, 4096) });
+      if (response.status === 401 || response.status === 403) throw new TransportError("This account has not granted access to connected tools and skills. Reconnect it from the account menu to review the permissions.", 401, requestId);
+      throw publicRequestError(response.status, requestId, false);
+    }
+    return await jsonPayload(response)     ;
+  }
+
+  /**
+   * Auto mode's independent command check. Returns undefined whenever the
+   * review cannot run, so the caller falls back to asking the person.
+   */
+  async auditCommand(options                     )                                     {
+    try {
+      // Never authorize a full command based on a truncated preview.
+      if (options.command.length > 8_000) return undefined;
+      const token = await this.auth.accessToken(this.origin(), options.signal);
+      if (!token) return undefined;
+      const state = {
+        command: redactSecrets(options.command).slice(0, 8_000),
+        agent_reason: "",
+        workspace: options.workspace,
+        user_messages: options.userMessages.map((message) => redactSecrets(message).slice(0, 3_000)),
+      };
+      const body = JSON.stringify({ model: options.model, state });
+      if (body.length > 28_000) return undefined;
+      const signal = AbortSignal.any([options.signal || new AbortController().signal, AbortSignal.timeout(8_000)]);
+      const response = await fetch(`${this.origin().replace(/\/$/, "")}/app/v1/audit/command`, {
+        method: "POST", signal, body,
+        headers: { accept: "application/json", "content-type": "application/json", authorization: `Bearer ${token}` },
+      });
+      if (!response.ok) return undefined;
+      const payload = await jsonPayload(response);
+      // Auto mode guards against something bad happening; it is not a reason to
+      // interrupt ordinary, probably-fine work. Anything the reviewer judges
+      // more likely than not authorized and aligned clears the gate.
+      if (payload.decision === "allow" && payload.authorized === true && Number(payload.confidence) >= 0.51 && ["low", "medium", "high"].includes(String(payload.risk))) return "allow";
+      return payload.decision === "stop" ? "stop" : "ask";
+    } catch { return undefined; }
   }
 
           async request(path        , init             )                    {
@@ -45,27 +109,80 @@ export class GatewayTransport {
       ...init, headers: { "content-type": "application/json", authorization: `Bearer ${token || fallback}`, "x-session-id": this.sessionId, ...init.headers },
     });
     if (!response.ok) {
+      const requestId = publicRequestId(response.headers);
+      const detail = (await response.text()).slice(0, 4096);
+      this.diagnostic({ path, status: response.status, requestId, detail });
       if (token && (response.status === 401 || response.status === 403)) {
         await this.auth.invalidateActive();
-        throw new Error("This account is no longer authorized or its work membership is inactive. Switch to another account or reconnect it.");
+        throw new Error(`This account is no longer authorized or its work membership is inactive. Switch to another account or reconnect it.${suffix(requestId)}`);
       }
-      throw new Error(`Gateway returned ${response.status}: ${(await response.text()).slice(0, 4096)}`);
+      throw publicRequestError(response.status, requestId, !token);
     }
     return response;
   }
 }
 
+function defaultDiagnostic(entry                     )       {
+  // Customer machines are not a protected administrative diagnostics sink.
+  // Detailed service diagnostics remain on the server.
+  console.error(`Cenmax AI request failed (HTTP ${entry.status}).${suffix(entry.requestId)}`);
+}
+
+function publicRequestId(headers         )                     {
+  for (const name of ["x-request-id", "request-id", "x-cenmax-request-id"]) {
+    const value = headers.get(name)?.trim();
+    if (value) return value.replace(/[^A-Za-z0-9._:-]/g, "").slice(0, 128) || undefined;
+  }
+  return undefined;
+}
+
+function suffix(requestId                    )         { return requestId ? ` Request ID: ${requestId}.` : ""; }
+
+function publicRequestError(status        , requestId                    , apiKeyFallback         )                 {
+  if (apiKeyFallback && (status === 401 || status === 403)) return new TransportError(`The configured API key is not authorized for this request. Check the key or sign in with OAuth.${suffix(requestId)}`, status, requestId);
+  const reason = status === 400 ? "The request was not accepted. Adjust the request and try again."
+    : status === 404 ? "The requested Cenmax AI resource was not found."
+    : status === 408 ? "The request timed out. Please try again."
+    : status === 409 ? "The request conflicted with the current account state. Please try again."
+    : status === 429 ? "You have reached a usage limit. Try again when the window resets."
+    : status >= 500 ? "Cenmax AI is temporarily unavailable. Please try again."
+    : "The request could not be completed.";
+  return new TransportError(`Cenmax AI request failed (HTTP ${status}). ${reason}${suffix(requestId)}`, status, requestId);
+}
+
+async function jsonPayload(response          )                                   {
+  try { return await response.json()                           ; }
+  catch { throw new Error("Cenmax AI returned an unreadable response. Please try again."); }
+}
+
 export function outbound(message         )                          {
   const calls = message.content.filter((block) => block.type === "tool_call");
+  const images = message.content.filter((block)                      => block.type === "image");
   const result = message.content.find((block) => block.type === "tool_result");
   const text = message.content.filter((block) => block.type === "text").map((block) => block.text).join("\n");
-  if (result && result.type === "tool_result" && !calls.length) return { role: "tool", tool_call_id: result.callId, content: result.text };
+  if (images.length && message.role === "user") {
+    const content                                 = [];
+    if (text) content.push({ type: "text", text });
+    for (const image of images) content.push({ type: "image_url", image_url: { url: `data:${image.mimeType};base64,${image.data}` } });
+    return { role: message.role, content };
+  }
+  if (result && result.type === "tool_result" && !calls.length) {
+    // A result carrying an image becomes the array content form; a text-only
+    // result keeps the plain string form, which is the more portable of the two.
+    if (images.length) {
+      const content                                 = [];
+      if (result.text) content.push({ type: "text", text: result.text });
+      for (const image of images) content.push({ type: "image_url", image_url: { url: `data:${image.mimeType};base64,${image.data}` } });
+      return { role: "tool", tool_call_id: result.callId, content };
+    }
+    return { role: "tool", tool_call_id: result.callId, content: result.text };
+  }
   if (calls.length) return { role: message.role, content: text || null, tool_calls: calls.map((call) => call.type === "tool_call" && ({ id: call.callId, type: "function", function: { name: call.name, arguments: call.arguments } })) };
   return { role: message.role, content: text };
 }
 
 export async function parseEventStream(response          , onDelta                        , onReasoning                         = () => {})                      {
-  if (!response.body) throw new Error("Gateway stream had no body");
+  if (!response.body) throw new Error("Cenmax AI stream had no body.");
   const reader = response.body.pipeThrough(new TextDecoderStream()).getReader();
   let buffer = "", text = "", usage = emptyUsage();
   const calls = new Map                                                         ();
@@ -106,7 +223,7 @@ export async function parseEventStream(response          , onDelta              
   for (const call of [...calls.entries()].sort(([a], [b]) => a - b).map(([, value]) => value)) {
     const args = call.arguments.trim() || "{}"; JSON.parse(args); if (call.name) blocks.push({ type: "tool_call", callId: call.id, name: call.name, arguments: args });
   }
-  if (!blocks.length) throw new Error("Gateway stream contained no message or tool call");
+  if (!blocks.length) throw new Error("Cenmax AI stream contained no message or tool call.");
   return { message: { role: "assistant", content: blocks }, usage };
 }
 

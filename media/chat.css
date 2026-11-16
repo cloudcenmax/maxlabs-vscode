@@ -75,6 +75,13 @@ button, textarea { font: inherit; }
 @keyframes tool-pulse { to { opacity: .4; } }
 .tool-card[open] .tool-chevron { transform: rotate(90deg); }
 .tool-detail { margin: 0; padding: 9px 10px 11px; border-top: 1px solid var(--vscode-panel-border); color: var(--vscode-descriptionForeground); font: 11px/1.5 var(--vscode-editor-font-family); white-space: pre-wrap; max-height: 240px; overflow: auto; }
+.thinking-card { margin: 7px 0 13px; border: 1px solid var(--vscode-panel-border); border-radius: 8px; background: color-mix(in srgb, var(--vscode-textCodeBlock-background) 55%, transparent); overflow: hidden; }
+.thinking-summary { display: flex; align-items: center; gap: 7px; min-height: 32px; padding: 7px 9px; color: var(--vscode-descriptionForeground); font-size: 11px; }
+.thinking-spinner { flex: 0 0 auto; width: 10px; height: 10px; border: 2px solid color-mix(in srgb, var(--vscode-descriptionForeground) 35%, transparent); border-top-color: var(--maxlabs-pink); border-radius: 50%; animation: thinking-spin .8s linear infinite; }
+@keyframes thinking-spin { to { transform: rotate(360deg); } }
+.thinking-label { font-weight: 600; color: var(--vscode-foreground); }
+.thinking-count { margin-left: auto; font: 10px var(--vscode-editor-font-family); color: var(--vscode-descriptionForeground); }
+.thinking-card.done { opacity: .92; }
 .approval-card { margin: 8px 0 14px; padding: 11px; border: 1px solid color-mix(in srgb, var(--vscode-editorWarning-foreground) 55%, var(--vscode-panel-border)); border-radius: 10px; background: color-mix(in srgb, var(--vscode-editorWarning-foreground) 7%, var(--vscode-editor-background)); box-shadow: 0 8px 24px rgba(0,0,0,.08); }
 .approval-heading { display: flex; align-items: center; gap: 7px; }
 .approval-heading .svg-icon { color: var(--vscode-editorWarning-foreground); }
@@ -139,6 +146,9 @@ textarea { display: block; width: 100%; min-height: 62px; max-height: 210px; res
 .thinking-control #thinkingLabel { min-width: 38px; color: var(--vscode-foreground); font-size: 10px; }
 button.primary { display: grid; place-items: center; width: 30px; min-width: 30px; height: 30px; background: var(--vscode-button-background); color: var(--vscode-button-foreground); border: 0; border-radius: 8px; padding: 0; cursor: pointer; }
 button.primary:hover { background: var(--vscode-button-hoverBackground); }
+.stop-button { background: var(--vscode-inputValidation-errorBorder, #be1100); color: var(--vscode-inputValidation-errorForeground, #fff); }
+.stop-button:hover { background: color-mix(in srgb, var(--vscode-inputValidation-errorBorder, #be1100) 84%, black); }
+.stop-button .svg-icon { width: 13px; height: 13px; fill: currentColor; }
 .auth { display: flex; gap: 2px; }
 .icon-button.compact { width: 28px; height: 28px; padding: 0; }
 .icon-button.connected { color: var(--vscode-testing-iconPassed); }
@@ -148,3 +158,10 @@ button.primary:hover { background: var(--vscode-button-hoverBackground); }
 @media (max-width: 520px) { .auth-shortcut { display: none; } .thinking-control input[type="range"] { width: 46px; } .thinking-control #thinkingLabel { display: none; } .model-pill { max-width: 112px; } }
 @media (max-width: 360px) { .actions { gap: 2px; } .action-end { gap: 1px; } .thinking-control { padding: 0 2px; } .thinking-control input[type="range"] { width: 36px; } .model-pill { max-width: 88px; } }
 @media (max-width: 290px) { .user { margin-left: 5px; } .thinking-control { display: none; } .composer-pill { max-width: 82px; padding-inline: 5px; } }
+.attachments { display: flex; flex-wrap: wrap; gap: 6px; padding: 8px 8px 0; }
+.attachment { position: relative; }
+.attachment img { display: block; width: 54px; height: 54px; object-fit: cover; border: 1px solid var(--vscode-panel-border); border-radius: 7px; }
+.attachment-remove { position: absolute; top: -5px; right: -5px; width: 18px; height: 18px; padding: 0; border: 1px solid var(--vscode-panel-border); border-radius: 50%; background: var(--vscode-editor-background); color: var(--vscode-foreground); font-size: 12px; line-height: 1; cursor: pointer; }
+.attachment-remove:hover { background: var(--vscode-toolbar-hoverBackground); }
+.user-images { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 7px; }
+.user-images img { max-width: 100%; max-height: 180px; border: 1px solid var(--maxlabs-neutral-border); border-radius: 7px; }
